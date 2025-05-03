@@ -1,18 +1,12 @@
-let translateButton = document.querySelector('#translateButton');
+const sendButton = document.querySelector('#sendButton');
+const inputText = document.querySelector('#inputext');
+const chatWindow = document.querySelector('#chatWindow');
 
-translateButton.addEventListener('click', async () => {
-    // stringa da tradurre
-    let inputText = document.querySelector('#inputext');
+async function request() {
     const text = inputText.value.trim();
-
-    // lingua di destinazione
-    const targetLang = document.querySelector('#targetLang').value;
     if (!text) return;
 
-    // contenitore finestra chat
-    const chatWindow = document.querySelector('#chatWindow');
-
-    // messaggio utente
+    // Messaggio utente
     const userMessage = document.createElement('div');
     userMessage.className = "flex justify-end";
 
@@ -24,33 +18,38 @@ translateButton.addEventListener('click', async () => {
     chatWindow.appendChild(userMessage);
     chatWindow.scrollTop = chatWindow.scrollHeight;
 
-    // chiamata backend
+    inputText.value = '';
+
     try {
-        const response = await fetch("/api/translate", {
-            method: "POST",
+        const response = await fetch('/api/chatbot/', {
+            method: 'POST',
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text, targetLang })
+            body: JSON.stringify({ message: text })
         });
 
         const data = await response.json();
 
-        // risposta AI
         const iaResponse = document.createElement('div');
         iaResponse.className = "flex justify-start";
 
         const aiBubble = document.createElement('div');
         aiBubble.className = "max-w-[70%] bg-gray-700 text-white text-sm px-4 py-2 rounded-xl rounded-bl-none";
-        aiBubble.textContent = data.translateText;
+        aiBubble.textContent = data.reply;
 
         iaResponse.appendChild(aiBubble);
         chatWindow.appendChild(iaResponse);
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
-
     } catch (error) {
-        console.log('err:' + error);
+        console.log('error: ', error);
     }
+}
 
-    // pulisci input
-    inputText.value = "";
+sendButton.addEventListener("click", request);
+
+inputText.addEventListener("keypress", async function (event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        await request();
+    }
 });

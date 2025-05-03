@@ -27,15 +27,25 @@ const openai = new OpenAI({
 //rute /endpoint / url
 app.post('/api/chatbot/', async (req, res) => {
     //contesto da mandare a Openai
-    const context = `Sei un assistente per il supermercato Esselunga.
-                        Dati:
-                        - Indirizzo: Viale Tibaldi, 7, 20136 Milano MI
-                        -Telefono: 02 832 3918
-                        - Orari: Lun-Sab 9-21
-                        - Prodotti: Pane, Latte, Uova, Frutta, Verdura, Carne, Bibite
-                        - Marchi: Mulino Bianco, Parmalat, Dole, Coca-Cola, Sprite
-                        - Pagamenti: Contanti, Carta
-                        Rispondi solo a domande su attività/prodotti. Altre domande vietate. Risposte brevi, dirette, sintetiche.`
+    const context = `Sei un assistente per l'Università Nova Studium.
+    Dati:
+    - Indirizzo: Via Galileo Galilei 12, Roma
+    - Tel: 06 1234 5678
+    - Orari segreteria: Lun-Ven 9-17
+    - Corsi:
+    1. Informatica – Prof. Bianchi – Lun/Mer 10-12
+    2. Economia – Prof.ssa Rossi – Mar/Gio 14-16
+    3. Psicologia – Prof. Verdi – Lun/Ven 11-13
+    - Esami:
+    - Informatica: 12/06, aula 3
+    - Economia: 18/06, aula 1
+    - Psicologia: 21/06, aula 2
+    - CFU:
+    - Informatica: 6 CFU
+    - Economia: 9 CFU
+    - Psicologia: 6 CFU
+    Rispondi solo su corsi, orari, docenti, esami, CFU e servizi dell’università. Altre domande vietate. Risposte brevi, chiare, dirette.`;
+
     //return res.json({ message: 'server on' });
 
     //domanda user
