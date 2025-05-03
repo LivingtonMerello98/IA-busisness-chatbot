@@ -1,14 +1,4 @@
 let translateButton = document.querySelector('#translateButton');
-let languages = ['Sumero ', 'Akkadico', 'Sanskrito vedico', 'Greco miceneo '];
-let selectContainer = document.querySelector('.select-container');
-
-languages.forEach(lang => {
-    let option = document.createElement('option');
-    option.value = lang.toLowerCase();
-    option.textContent = lang;
-    selectContainer.appendChild(option);
-});
-
 
 translateButton.addEventListener('click', async () => {
     // stringa da tradurre
