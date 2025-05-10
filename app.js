@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
-let conversations = {};
+
 
 //rute /endpoint / url
 app.post('/api/chatbot/', async (req, res) => {
@@ -46,37 +46,29 @@ app.post('/api/chatbot/', async (req, res) => {
     - Psicologia: 6 CFU
     Rispondi solo su corsi, orari, docenti, esami, CFU e servizi dell’università. Altre domande vietate. Risposte brevi, chiare, dirette.`;
 
+    //return res.json({ message: 'server on' });
+
     //domanda user
-    const { userId, message } = req.body;
+    const { message } = req.body;
     if (!message) return res.status(404).json({ error: "empty message" });
-
-    conversations[userId].push({ role: 'user', content: message })
-    if (!conversations[userId]) {
-        conversations[userId] = [
-            { role: 'system', content: context },
-        ];
-    }
-
 
     //richiesta a openai
     try {
         const response = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
-            messages: conversations[userId],
+            messages: [
+                { role: 'system', content: context },
+                { role: 'user', content: message }
+            ],
             max_tokens: 200
         });
-
         //restituzione risposta a user
         const reply = response.choices[0].message.content;
-
-        //save in un ruolo il contesto 
-        conversations[userId].push({ role: 'assistant', content: reply });
-        console.log(conversations)
         return res.status(200).json({ reply });
 
     } catch (err) {
         console.log('ERROR:', err);
-        return res.status(500).json({
+        return res.status.json({
             error: 'error response'
         })
     }
