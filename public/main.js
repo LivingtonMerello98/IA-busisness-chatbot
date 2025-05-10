@@ -1,6 +1,7 @@
 const sendButton = document.querySelector('#sendButton');
 const inputText = document.querySelector('#inputext');
 const chatWindow = document.querySelector('#chatWindow');
+const userId = Date.now() + Math.floor(777 + Math.random() * 700);
 
 async function request() {
     const text = inputText.value.trim();
@@ -22,9 +23,10 @@ async function request() {
 
     try {
         const response = await fetch('/api/chatbot/', {
+            userId,
             method: 'POST',
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: text })
+            body: JSON.stringify({ userId, message: text })
         });
 
         const data = await response.json();
