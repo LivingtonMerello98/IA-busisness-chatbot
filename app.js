@@ -1,64 +1,86 @@
-//impo depend.
 import express from 'express';
 import axios from 'axios';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 
-//conf api key
+// Configura la chiave API
 dotenv.config();
 
-//expresss
+// Express
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-//serv. front
+// Servizio front-end
 app.use("/", express.static("public"));
 
-//middleware json
+// Middleware JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//istanza openIA con api key
+// Istanza OpenAI
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
 
+// Variabile per il contesto (lettura solo una volta all'avvio)
+let context = '';
 
-//rute /endpoint / url
-app.post('/api/chatbot/', async (req, res) => {
-    //contesto da mandare a Openai
-    const context = `Direttore di produzione. Milano. Stile Giulia Salvador. Esperto spot TV, anche esteri. Tecnico, rapido, pratico. Risposte secche, zero fronzoli.`;
-
-    //return res.json({ message: 'server on' });
-
-    //domanda user
-    const { message } = req.body;
-    if (!message) return res.status(404).json({ error: "empty message" });
-
-    //richiesta a openai
+// Funzione per caricare il contesto dal file JSON
+const loadContext = () => {
+    const contextPath = path.join('C:', 'Users', 'livi9', 'Desktop', 'progetti', 'batch_JSON', 'estrazioni', 'estrazione.json');
     try {
+        const fileContent = fs.readFileSync(contextPath, 'utf-8');
+        const jsonData = JSON.parse(fileContent);
+
+        // Costruire un contesto basato sui dati del JSON
+        context = jsonData.map(item => {
+            return `Cocktail: ${item.name}, Ingredients: ${item.ingredients}`;
+        }).join("\n");  // Combina tutti i cocktail in un'unica stringa, separati da newline
+
+        console.log('Contesto caricato correttamente');
+    } catch (error) {
+        console.error('Errore nel caricamento del contesto:', error);
+    }
+};
+
+// Carica il contesto all'avvio del server
+loadContext();
+
+// Rete API (endpoint)
+app.post('/api/chatbot/', async (req, res) => {
+    // Verifica se il contesto è stato caricato correttamente
+    if (!context) {
+        return res.status(500).json({ error: 'Contesto non caricato correttamente' });
+    }
+
+    // Messaggio dell'utente
+    const { message } = req.body;
+    if (!message) return res.status(404).json({ error: "Messaggio vuoto" });
+
+    try {
+        // Richiesta a OpenAI
         const response = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
             messages: [
                 { role: 'system', content: context },
+                { role: 'system', content: 'puoi solamente rispondere a domande inerenti ai cocktail, sei un bartender.' },
                 { role: 'user', content: message }
             ],
             max_tokens: 200
         });
-        //restituzione risposta a user
+
         const reply = response.choices[0].message.content;
         return res.status(200).json({ reply });
 
     } catch (err) {
-        console.log('ERROR:', err);
-        return res.status.json({
-            error: 'error response'
-        })
+        console.error('Errore:', err);
+        return res.status(500).json({ error: 'Errore nella risposta' });
     }
+});
 
-
-})
-//serv backend
+// Avvio del server
 app.listen(PORT, () => {
-    console.log('server running on port: ' + PORT);
+    console.log('Server in esecuzione sulla porta: ' + PORT);
 });
